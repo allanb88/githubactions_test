@@ -3,6 +3,7 @@
 Guía completa para el proyecto `prueba-gha`: imagen con SHA del commit,
 push a Docker Hub y deploy automático en Minikube local.
 
+cambio para aplicar
 ---
 
 ## Estructura de archivos relevantes
