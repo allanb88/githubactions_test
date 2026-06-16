@@ -1,7 +1,7 @@
 on:
   push:
     branches-ignore:
-    - master
+    - main
 
 name: CI
 jobs:
@@ -25,4 +25,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: false
-          tags: pablokbs/prueba-gha:${{ github.sha }}
+          tags: allanbs88/prueba-gha:${{ github.sha }}

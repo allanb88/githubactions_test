@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - master
+      - main
 name: CD
 jobs:
   docker:
@@ -24,25 +24,21 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: pablokbs/prueba-gha:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/prueba-gha:${{ github.sha }}
 
   deploy-to-cluster:
     name: deploy to cluster
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: docker
     steps:
     -
-      name: deploy to cluster
-      uses: steebchen/kubectl@v2.0.0
-      with:
-        config: ${{ secrets.KUBE_CONFIG_DATA }}
-        command: -n prueba set image --record deployment/prueba-gha prueba-gha=pablokbs/prueba-gha:${{ github.sha }}
+      name: Checkout
+      uses: actions/checkout@v4
     -
-      name: verify deployment
-      uses: steebchen/kubectl@v2.0.0
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-        KUBECTL_VERSION: "1.28"
-      with:
-        config: ${{ secrets.KUBE_CONFIG_DATA }}
-        command: -n prueba rollout status deployment/prueba-gha
+      name: Create or update deployment
+      run: |
+        kubectl apply -k .kustomize/ -n prueba
+        kubectl set image deployment/prueba-gha prueba-gha=${{ secrets.DOCKER_USERNAME }}/prueba-gha:${{ github.sha }} -n prueba
+    -
+      name: Verify deployment
+      run: kubectl rollout status deployment/prueba-gha -n prueba
